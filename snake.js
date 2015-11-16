@@ -3,8 +3,8 @@ function doTouchStart(event) {
 
     var x = event.targetTouches[0].pageX;
     var y = event.targetTouches[0].pageY;
-    hero.x = x;
-    hero.y = y;
+    hero.x = x - 36;
+    hero.y = y - 36;
 }
 
 
@@ -15,7 +15,7 @@ var ctx = canvas.getContext("2d");
 canvas.width = 512;
 canvas.height = 384;
 document.body.appendChild(canvas);
-canvas.addEventListener("touchstart", doTouchStart, false);
+canvas.addEventListener("touchmove", doTouchStart, false);
 
 
 // Background image
