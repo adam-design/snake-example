@@ -1,9 +1,22 @@
+function doTouchStart(event) {
+    event.preventDefault();
+
+    var x = event.targetTouches[0].pageX;
+    var y = event.targetTouches[0].pageY;
+    hero.x = x;
+    hero.y = y;
+}
+
+
+
 // Create the canvas
 var canvas = document.createElement("canvas");
 var ctx = canvas.getContext("2d");
 canvas.width = 512;
 canvas.height = 384;
 document.body.appendChild(canvas);
+canvas.addEventListener("touchstart", doTouchStart, false);
+
 
 // Background image
 var bgReady = false;
