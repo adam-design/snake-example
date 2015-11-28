@@ -41,17 +41,35 @@ var monsterImage = new Image();
 monsterImage.onload = function () {
     monsterReady = true;
 };
+
+// Knife Image
+var knifeImageReady = false;
+var knifeImage = new Image();
+knifeImage.onload = function () {
+    knifeReady = true;
+};
 monsterImage.src = "images/fish.png";
+knifeImage.src = "images/knife.png";
 
 // Game objects
 var hero = {
     speed: 256, // movement in pixels per second
     x: canvas.width / 2,
-    y: canvas.height / 2
+    y: canvas.height / 2,
+    width: 32,
+    offsetx: 40,
+    height: 32,
+    offsety: 12
 
 };
-var monster = {};
+var monster = {
+    speed: 4,
+    width: 16,
+    height: 16,
+    trash: false
+};
 var fishEaten = 0;
+var livesLost = 3;
 
 // Handle keyboard controls
 var keysDown = {};
@@ -68,10 +86,18 @@ addEventListener("keyup", function (e) {
 var reset = function () {
 
 
-    // Throw the monster somewhere on the screen randomly
-    monster.x = 32 + (Math.random() * (canvas.width - 64));
+    // Throw the monster somewhere on the right side of the screen randomly
+    monster.x = canvas.width;
     monster.y = 32 + (Math.random() * (canvas.height - 64));
-};
+    var trashtest = Math.floor(Math.random() * 3 + 1);
+
+    if (trashtest == 1)
+        monster.trash = true;
+    else
+        monster.trash = false;
+
+
+}
 
 // Update game objects
 var update = function (modifier) {
@@ -96,6 +122,10 @@ var update = function (modifier) {
         hero.x = canvas.width;
     }
 
+    if (monster.x < 0 - 36) { // Player goes past left boundary
+        reset();
+    }
+
     if (hero.y > canvas.height + 30) { // Player goes past top }
         hero.y = 0;
     }
@@ -106,15 +136,24 @@ var update = function (modifier) {
 
     // Are they touching?
     if (
-        hero.x <= (monster.x + 32) && monster.x <= (hero.x + 32) && hero.y <= (monster.y + 32) && monster.y <= (hero.y + 32)
+        (hero.x + hero.offsetx) <= (monster.x + monster.width) && monster.x <= (hero.x + hero.width + hero.offsetx) && (hero.y + hero.offsety) <= (monster.y + monster.height) && monster.y <= (hero.y + hero.height + hero.offsety)
     ) {
-        ++fishEaten;
+        if (monster.trash) {
+            --livesLost;
+
+        } else {
+            ++fishEaten;
+
+        }
         reset();
     }
+
 };
 
 // Draw everything
 var render = function () {
+    var debug = false;
+    monster.x -= monster.speed;
     if (bgReady) {
         ctx.drawImage(bgImage, 0, 0);
     }
@@ -123,8 +162,18 @@ var render = function () {
         ctx.drawImage(heroImage, hero.x, hero.y);
     }
 
-    if (monsterReady) {
-        ctx.drawImage(monsterImage, monster.x, monster.y);
+    if (monsterReady && knifeReady) {
+
+        if (monster.trash) {
+            ctx.drawImage(knifeImage, monster.x, monster.y);
+        } else
+            ctx.drawImage(monsterImage, monster.x, monster.y);
+
+
+    }
+    if (debug) {
+        ctx.strokeRect(monster.x, monster.y, monster.width, monster.height);
+        ctx.strokeRect(hero.x + hero.offsetx, hero.y + hero.offsety, hero.width, hero.height);
     }
 
     // Score
@@ -132,7 +181,9 @@ var render = function () {
     ctx.font = "24px Helvetica";
     ctx.textAlign = "left";
     ctx.textBaseline = "top";
-    ctx.fillText("Fish eaten: " + fishEaten, 32, 32);
+    ctx.fillText("Fish swallowed: " + fishEaten, 32, 32);
+    ctx.fillText("Lives left: " + livesLost, 60, 80);
+
 };
 
 // The main game loop
